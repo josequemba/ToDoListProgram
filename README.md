@@ -15,7 +15,7 @@ IDE: CLion (Apple Clang compiler)
 
 Compiler: Apple Clang 17.0.0
 
-Libraries: <iostream>, <string>, <vector>, <fstream>, <iomanip>, <stdexcept>, <chrono>, <ctime>, <limits>
+Libraries: `<iostream>, <string>, <vector>, <fstream>, <iomanip>, <stdexcept>, <chrono>, <ctime>, <limits>`
 
 # Useful Websites
 
