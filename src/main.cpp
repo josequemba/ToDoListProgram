@@ -1,25 +1,28 @@
-#include <iostream>
-#include <string>
-#include <limits>
-#include <iomanip>
-#include <stdexcept>
-#include "Task.h"
-#include "TodoList.h"
-#include "FileManager.h"
+#include <iostream>                     // Standard input/output stream
+#include <string>                       // String manipulation
+#include <limits>                       // For std::numeric_limits
+#include <iomanip>                      // For formatted output like std::setw
+#include <stdexcept>                   // For standard exceptions
+#include "Task.h"                       // Task class declaration
+#include "TodoList.h"                   // TodoList class declaration
+#include "FileManager.h"                // FileManager class declaration
 
+// Clears the console screen based on the OS
 void clearScreen() {
 #ifdef _WIN32
-    system("cls");
+    system("cls");                      // Windows command to clear screen
 #else
-    system("clear");
+    system("clear");                    // Unix/Linux/macOS command
 #endif
 }
 
+// Pauses the screen until the user presses Enter
 void pauseScreen() {
     std::cout << "\nPress Enter to continue...";
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
 
+// Displays program title
 void displayHeader() {
     clearScreen();
     std::cout << "========================================\n";
@@ -27,6 +30,7 @@ void displayHeader() {
     std::cout << "========================================\n";
 }
 
+// Displays the main menu options
 void displayMenu() {
     std::cout << "\nMAIN MENU:\n";
     std::cout << "1. Add a new task\n";
@@ -40,12 +44,14 @@ void displayMenu() {
     std::cout << "Enter your choice (1-7): ";
 }
 
+// Displays a formatted list of tasks
 void displayTasks(const std::vector<Task>& tasks) {
     if (tasks.empty()) {
         std::cout << "\nNo tasks to display.\n";
         return;
     }
 
+    // Table header
     std::cout << "\n----- Your Tasks -----\n";
     std::cout << std::left << std::setw(5) << "ID" << " | "
               << std::setw(8) << "STATUS" << " | "
@@ -53,6 +59,7 @@ void displayTasks(const std::vector<Task>& tasks) {
               << "CREATED ON\n";
     std::cout << std::string(70, '-') << "\n";
 
+    // Iterates through tasks and prints details
     for (const auto& task : tasks) {
         std::string status = task.isCompleted() ? "DONE" : "PENDING";
         std::cout << std::left << std::setw(5) << task.getId() << " | "
@@ -63,32 +70,36 @@ void displayTasks(const std::vector<Task>& tasks) {
                   << task.getFormattedCreationDate() << "\n";
     }
 
+    // Table footer
     std::cout << std::string(70, '-') << "\n";
     std::cout << "Total: " << tasks.size() << " task(s)\n";
 }
 
+// Gets and validates user's menu choice
 int getMenuChoice() {
     int choice;
     while (true) {
-        if (!(std::cin >> choice)) {
-            std::cin.clear();
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        if (!(std::cin >> choice)) { // Input is not an integer
+            std::cin.clear(); // Clear error flags
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Discard invalid input
             std::cout << "Invalid input. Please enter a number: ";
-        } else if (choice < 1 || choice > 7) {
+        } else if (choice < 1 || choice > 7) { // Out of valid range
             std::cout << "Invalid choice. Please enter a number between 1 and 7: ";
         } else {
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clean up newline
             return choice;
         }
     }
 }
 
+// Main application logic
 int main() {
-    TodoList todoList;
-    FileManager fileManager;
-    bool running = true;
+    TodoList todoList;                  // Holds all tasks in memory
+    FileManager fileManager;            // Manages file I/O
+    bool running = true;                // Controls program loop
 
     try {
+        // Load saved tasks on startup if file exists
         if (fileManager.fileExists()) {
             displayHeader();
             std::cout << "Loading saved tasks...\n";
@@ -98,6 +109,7 @@ int main() {
             pauseScreen();
         }
 
+        // Main program loop
         while (running) {
             displayHeader();
             displayMenu();
@@ -105,7 +117,7 @@ int main() {
             int choice = getMenuChoice();
 
             switch (choice) {
-                case 1: { // Add a task
+                case 1: { // Add a new task
                     displayHeader();
                     std::cout << "=== ADD NEW TASK ===\n\n";
                     std::string description;
@@ -198,7 +210,7 @@ int main() {
                     break;
                 }
 
-                case 5: { // Save tasks
+                case 5: { // Save tasks to file
                     displayHeader();
                     std::cout << "=== SAVE TASKS TO FILE ===\n";
 
@@ -216,7 +228,7 @@ int main() {
                     break;
                 }
 
-                case 6: { // Load tasks
+                case 6: { // Load tasks from file
                     displayHeader();
                     std::cout << "=== LOAD TASKS FROM FILE ===\n";
 
@@ -244,7 +256,7 @@ int main() {
                     break;
                 }
 
-                case 7: { // Exit
+                case 7: { // Exit the application
                     displayHeader();
                     std::cout << "=== EXIT ===\n";
 
@@ -262,13 +274,13 @@ int main() {
                     }
 
                     std::cout << "\nGoodbye!\n";
-                    running = false;
+                    running = false; // Break the loop
                     break;
                 }
             }
         }
     } catch (const std::exception& e) {
-        std::cerr << "Fatal error: " << e.what() << "\n";
+        std::cerr << "Fatal error: " << e.what() << "\n"; // Catch-all for unexpected runtime errors
         return 1;
     }
 

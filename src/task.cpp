@@ -3,95 +3,70 @@
 #include <iomanip>
 #include <stdexcept>
 
-// Constructors
+// Default constructor: sets safe defaults for everything
 Task::Task() : id(0), description(""), completed(false), creationDate(0), completionDate(0) {}
 
+// Main constructor: ensures every task has a valid ID and description
 Task::Task(int id, const std::string& description)
     : id(id), description(description), completed(false), completionDate(0) {
+
     if (id <= 0) {
         throw std::invalid_argument("Task ID must be positive");
     }
     if (description.empty()) {
         throw std::invalid_argument("Task description cannot be empty");
     }
-    creationDate = time(nullptr);
+
+    creationDate = time(nullptr); // Timestamp when task is created
 }
 
 // Getters
-int Task::getId() const {
-    return id;
-}
+int Task::getId() const { return id; }
+std::string Task::getDescription() const { return description; }
+bool Task::isCompleted() const { return completed; }
+time_t Task::getCreationDate() const { return creationDate; }
+time_t Task::getCompletionDate() const { return completionDate; }
 
-std::string Task::getDescription() const {
-    return description;
-}
-
-bool Task::isCompleted() const {
-    return completed;
-}
-
-time_t Task::getCreationDate() const {
-    return creationDate;
-}
-
-time_t Task::getCompletionDate() const {
-    return completionDate;
-}
-
-// Setters
+// Setters with validation
 void Task::setId(int id) {
-    if (id <= 0) {
-        throw std::invalid_argument("Task ID must be positive");
-    }
+    if (id <= 0) throw std::invalid_argument("Task ID must be positive");
     this->id = id;
 }
 
 void Task::setDescription(const std::string& description) {
-    if (description.empty()) {
-        throw std::invalid_argument("Task description cannot be empty");
-    }
+    if (description.empty()) throw std::invalid_argument("Task description cannot be empty");
     this->description = description;
 }
 
-// Methods
+// Marks the task complete and records the time
 void Task::markAsCompleted() {
     completed = true;
     completionDate = time(nullptr);
 }
 
+// Converts creation time to readable string
 std::string Task::getFormattedCreationDate() const {
-    struct tm* timeinfo;
+    struct tm* timeinfo = localtime(&creationDate);
+    if (!timeinfo) return "Invalid date";
+
     char buffer[80];
-
-    timeinfo = localtime(&creationDate);
-    if (timeinfo == nullptr) {
-        return "Invalid date";
-    }
-
     strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", timeinfo);
-
     return std::string(buffer);
 }
 
+// Converts completion time to readable string, or shows it's not done
 std::string Task::getFormattedCompletionDate() const {
-    if (!completed) {
-        return "Not completed";
-    }
+    if (!completed) return "Not completed";
 
-    struct tm* timeinfo;
+    struct tm* timeinfo = localtime(&completionDate);
+    if (!timeinfo) return "Invalid date";
+
     char buffer[80];
-
-    timeinfo = localtime(&completionDate);
-    if (timeinfo == nullptr) {
-        return "Invalid date";
-    }
-
     strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", timeinfo);
-
     return std::string(buffer);
 }
 
-// Conversion to string for file operations
+// Serializes the task to a string for saving to file
 std::string Task::toString() const {
     std::stringstream ss;
     ss << id << "|" << description << "|" << (completed ? "1" : "0") << "|"
@@ -99,11 +74,13 @@ std::string Task::toString() const {
     return ss.str();
 }
 
+// Parses a task from a string (e.g. when loading from file)
 Task Task::fromString(const std::string& str) {
     std::stringstream ss(str);
     std::string item;
     std::vector<std::string> parts;
 
+    // Split on |
     while (std::getline(ss, item, '|')) {
         parts.push_back(item);
     }
